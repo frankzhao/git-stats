@@ -12,7 +12,7 @@ Report some useful metrics from git repositories and plot them. Useful for repor
 
 ## Usage
 
-1. Create a conffiguration file named `repos.yml` based on the temmplate provided in `repos-template.yml`.
+1. Create a configuration file named `repos.yml` based on the temmplate provided in `repos-template.yml`.
 1. Add repository information in the `repositories` section. If a repository URL is specified, the repository will be
    cloned, otherwise the value of `path` will be used to locate a local repository. Only one of `path` or `url` is
    required.
