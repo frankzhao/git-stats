@@ -121,9 +121,9 @@ if __name__ == '__main__':
             ),
             row=2, col=2)
         fig['layout']['yaxis4']['title'] = 'Average tag time (days)'
-        title = 'Reporting period: {} - {}'.format(datetime.now().strftime('%D'),
-                                                   (datetime.now() - timedelta(days=reporting_period_days)).strftime(
-                                                       '%D'))
+        title = 'Reporting period: {} - {}'.format(
+            (datetime.now() - timedelta(days=reporting_period_days)).strftime('%D'),
+            datetime.now().strftime('%D'))
         fig.update_layout(title_text=title)
         # fig.update_layout(height=600, width=800, title_text="Repository metrics")
         fig.show()
