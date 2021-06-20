@@ -8,7 +8,7 @@ Report some useful metrics from git repositories and plot them. Useful for repor
 - Commits per repository
 - Average commits per day per repository
 - Commits per calendar week
-- Average days between tags per repository
+- Average days between tags per repository. Assumes tags are versions and monotonically increasing (e.g v1.0, v1.1).
 
 ## Usage
 
