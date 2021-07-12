@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import logging
 import sys
 from datetime import datetime, timedelta
@@ -50,7 +51,14 @@ if __name__ == '__main__':
         logger.info("Processing repository: %s", repo_name)
         git_commits = get_git_log(repo_path)
 
-        commits_per_iso_week = metrics.calculate_commits_per_iso_week(git_commits)
+        # Merge calendar week commits.
+        commits_per_iso_week_repo = metrics.calculate_commits_per_iso_week(git_commits)
+        for week, commits in commits_per_iso_week_repo.items():
+            if week in commits_per_iso_week:
+                commits_per_iso_week[week] += commits
+            else:
+                commits_per_iso_week[week] = commits
+
         commits_per_repository[repo_name] = commits_per_repository.get(repo_name, 0) \
                                             + metrics.calculate_commits_per_repository(git_commits)
 
@@ -110,6 +118,7 @@ if __name__ == '__main__':
             row=2, col=1)
         fig['layout']['xaxis3']['title'] = 'Week'
         fig['layout']['yaxis3']['title'] = 'Commits'
+        fig['layout']['xaxis3']['title'] = 'Commits per week'
 
         fig.add_trace(
             go.Bar(

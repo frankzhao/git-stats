@@ -59,13 +59,14 @@ class Metrics:
                 current_tag_date = tags[tag_name]['date']
                 if last_tag_date:
                     days_since_last_tag = (current_tag_date - last_tag_date).days
-                    self.logger.debug("Repo: %s, tag: %s, date:%s, since_last: %s days",
-                                      repo_name, tag_name, tags[tag_name]['date'], days_since_last_tag)
+                    self.logger.debug("Repo: {}, tag: {}, date: {}, since_last: {} days".format(
+                        repo_name, tag_name, tags[tag_name]['date'], days_since_last_tag))
                     average_days_since_last_tag = days_since_last_tag \
                         if not average_days_since_last_tag else average_days_since_last_tag + days_since_last_tag / 2
                 else:
-                    self.logger.debug("Repo: %s, tag: %s, date:%s, since_last: %s days".format(
+                    self.logger.debug("Repo: {}, tag: {}, date: {}, since_last: {} days".format(
                         repo_name, tag_name, current_tag_date, 0))
                 last_tag_date = current_tag_date
             average_tag_days_per_repository[repo_name] = average_days_since_last_tag
+
         return average_tag_days_per_repository
