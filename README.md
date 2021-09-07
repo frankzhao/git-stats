@@ -17,5 +17,6 @@ Report some useful metrics from git repositories and plot them. Useful for repor
    cloned, otherwise the value of `path` will be used to locate a local repository. Only one of `path` or `url` is
    required.
 1. Configure reporting options in the `config` section.
-   - `reporting_period` is a relative time in days, specified as `last{N}days`.
+   - `reporting_period` is a relative time in days, specified as `last{N}days`. Specify an absolute reporting 
+     period in the format `2021-08-01:2021-09-01`.
    - `plot` controls whether to generate plots from the metrics.

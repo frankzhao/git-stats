@@ -1,16 +1,16 @@
-import logging
-from datetime import datetime, timedelta
+from __future__ import annotations
 
-import pytz
+import logging
+import re
+from datetime import datetime, timedelta, timezone
 
 
 class ReportingPeriod:
-
     def __init__(self, start_datetime=None, end_datetime=None, short=''):
         if short.startswith('last') and short.endswith('days'):
-            window = self.parse_reporting_period(short)
-            self.end_datetime = datetime.now(tz=pytz.utc)
-            self.start_datetime = self.end_datetime - timedelta(days=window)
+            period = self.parse_reporting_period(short)
+            self.start_datetime = period.start_datetime
+            self.end_datetime = period.end_datetime
         elif start_datetime and end_datetime:
             self.start_datetime = start_datetime
             self.end_datetime = end_datetime
@@ -18,11 +18,28 @@ class ReportingPeriod:
             raise AssertionError('Must specify start_datetime and end_datetime, or short string. Got: {}'.format(short))
 
     @staticmethod
-    def parse_reporting_period(p: str) -> int:
+    def parse_reporting_period(p: str) -> ReportingPeriod:
+        logger = logging.getLogger('ReportingPeriod')
         if p.startswith('last') and p.endswith('days'):
-            return int(p.replace('last', '').replace('days', ''))
+            period = ReportingPeriod(
+                start_datetime=datetime.now(tz=timezone.utc) -
+                               timedelta(days=int(p.replace('last', '').replace('days', ''))),
+                end_datetime=datetime.now(tz=timezone.utc))
+        elif re.match('\\d{4}-\\d{2}-\\d{2}[+-]\\d{4}:\\d{4}-\\d{2}-\\d{2}[+-]\\d{4}', p):
+            start_date = p.split(':')[0]
+            end_date = p.split(':')[1]
+            period = ReportingPeriod(
+                start_datetime=datetime.strptime(start_date, '%Y-%m-%d%z'),
+                end_datetime=datetime.strptime(end_date, '%Y-%m-%d%z'))
         else:
             raise AssertionError('Invalid reporting period. Got: {}'.format(p))
+
+        logger.info("Reporting period start={} end={}".format(period.start_datetime, period.end_datetime))
+        reporting_period_days = (period.end_datetime - period.start_datetime).days
+        if reporting_period_days <= 0:
+            raise ValueError(
+                'Invalid reporting period duration. Reporting period days={}'.format(reporting_period_days))
+        return period
 
 
 class Metrics:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import plotly.graph_objects as go
 import yaml
@@ -29,10 +29,9 @@ if __name__ == '__main__':
 
     git_config = setup_git(config)
 
-    # repos = [(r['name'], r['path']) for r in config['repositories']]
     repos = [(name, path) for name, path in git_config['repositories'].items()]
-    reporting_period = config['config']['reporting_period']
-    reporting_period_days = ReportingPeriod.parse_reporting_period(reporting_period)
+    reporting_period = ReportingPeriod.parse_reporting_period(config['config']['reporting_period'])
+    reporting_period_days = (reporting_period.end_datetime - reporting_period.start_datetime).days
     plot = config['config']['plot']
     tags_by_repository = {}
 
@@ -64,7 +63,7 @@ if __name__ == '__main__':
 
         # reporting window calculations
         commits_per_repository_last_reporting_period[repo_name] = metrics.calculate_commits_per_repository(
-            git_commits, reporting_window=ReportingPeriod(short=reporting_period))
+            git_commits, reporting_window=reporting_period)
         total_commits_in_reporting_window = 0
         for repo, commit_count in commits_per_repository_last_reporting_period.items():
             commits_per_repository_per_day[repo] = commit_count / reporting_period_days
@@ -131,8 +130,8 @@ if __name__ == '__main__':
             row=2, col=2)
         fig['layout']['yaxis4']['title'] = 'Average tag time (days)'
         title = 'Reporting period: {} - {}'.format(
-            (datetime.now() - timedelta(days=reporting_period_days)).strftime('%D'),
-            datetime.now().strftime('%D'))
+            reporting_period.start_datetime.strftime('%D'),
+            reporting_period.end_datetime.strftime('%D'))
         fig.update_layout(title_text=title)
         # fig.update_layout(height=600, width=800, title_text="Repository metrics")
         fig.show()
