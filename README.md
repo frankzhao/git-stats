@@ -18,5 +18,5 @@ Report some useful metrics from git repositories and plot them. Useful for repor
    required.
 1. Configure reporting options in the `config` section.
    - `reporting_period` is a relative time in days, specified as `last{N}days`. Specify an absolute reporting 
-     period in the format `2021-08-01:2021-09-01`.
+     period in the format `2021-08-01+1100:2021-09-01+1100`.
    - `plot` controls whether to generate plots from the metrics.
