@@ -2,6 +2,7 @@ repositories:
   - name: repository-name
     path: /path/to/repo
     url: git@github.com:github/repository_url
+    branch: master
 config:
   reporting_period: last7days
   plot: true

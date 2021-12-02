@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     git_config = setup_git(config)
 
-    repos = [(name, path) for name, path in git_config['repositories'].items()]
+    repos = [(name, config) for name, config in git_config['repositories'].items()]
     reporting_period = ReportingPeriod.parse_reporting_period(config['config']['reporting_period'])
     reporting_period_days = (reporting_period.end_datetime - reporting_period.start_datetime).days
     plot = config['config']['plot']
@@ -46,9 +46,11 @@ if __name__ == '__main__':
     commits_per_repository_per_day = {}
     commits_per_day = 0
 
-    for repo_name, repo_path in repos:
+    for repo_name, config in repos:
+        repo_path = config['path']
+        repo_branch = config['branch']
         logger.info("Processing repository: %s", repo_name)
-        git_commits = get_git_log(repo_path)
+        git_commits = get_git_log(repo_path, repo_branch)
 
         # Merge calendar week commits.
         commits_per_iso_week_repo = metrics.calculate_commits_per_iso_week(git_commits)

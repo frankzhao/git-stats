@@ -21,9 +21,17 @@ def setup_git(config) -> dict:
     try:
         repos = config['repositories']
         for repo in repos:
+            config: dict = dict()
+
+            # Custom branch handling.
+            if 'branch' in repo:
+                config['branch'] = repo['branch']
+            else:
+                config['branch'] = 'master'
+
             if 'url' in repo:
                 logger.info('Cloning: %s', repo['url'])
-                cmd = ['git', 'clone', repo['url'], os.path.join(temp_dir, repo['name'])]
+                cmd = ['git', 'clone', '--branch', config['branch'], repo['url'], os.path.join(temp_dir, repo['name'])]
                 result = subprocess.run(cmd)
                 if result.returncode > 0:
                     logger.error("Could not clone repository: %s, repo=%s", result.stderr, repo['url'])
@@ -35,9 +43,12 @@ def setup_git(config) -> dict:
                     logger.error("Could not fetch repository: %s, repo=%s", result.stderr, repo['url'])
                     cleanup_git(git_config)
                     exit(1)
-                repo_config[repo['name']] = os.path.join(temp_dir, repo['name'])
+                config['path'] = os.path.join(temp_dir, repo['name'])
             else:
-                repo_config[repo['name']] = repo['path']
+                config['path'] = repo['path']
+
+            repo_config[repo['name']] = config
+
         git_config['repositories'] = repo_config
         return git_config
     except Exception as e:
@@ -103,14 +114,14 @@ def get_git_tag(repo_path, tag) -> Union[Commit, None]:
     return git_commit
 
 
-def get_git_log(repo_path) -> List[Commit]:
+def get_git_log(repo_path, branch='master') -> List[Commit]:
     print_format = '{%n  "commit": "%H",%n  "abbreviated_commit": "%h",%n  "tree": "%T",%n  "abbreviated_tree": "%t",%n  ' \
                    '"parent": "%P",%n  "abbreviated_parent": "%p",%n  "refs": "%D",%n  "encoding": "%e",%n  ' \
                    '"sanitized_subject_line": "%f",%n  "body": "%b",%n  "commit_notes": "%N",%n  ' \
                    '"verification_flag": "%G?",%n  "signer": "%GS",%n  "signer_key": "%GK",%n  ' \
                    '"author": {%n    "name": "%aN",%n    "email": "%aE",%n    "date": "%aD"%n  },%n  ' \
                    '"committer": {%n    "name": "%cN",%n    "email": "%cE",%n    "date": "%cD"%n  }%n},'
-    cmd = ['git', '--no-pager', 'log', '--pretty=format:\'' + print_format + '\'']
+    cmd = ['git', '--no-pager', 'log', branch, '--pretty=format:\'' + print_format + '\'']
 
     result = subprocess.run(cmd, cwd=repo_path, capture_output=True, text=True)
 
@@ -127,7 +138,7 @@ def get_git_log(repo_path) -> List[Commit]:
         logger.error(git_json)
         return []
 
-    logger.info("Found %s commits", len(git_log))
+    logger.info("Found %s commits in branch '%s'", len(git_log), branch)
     git_commits = []
     for e in git_log:
         git_commits.append(Commit(**e))
